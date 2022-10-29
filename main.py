@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 pygame.init()
 
@@ -15,16 +16,35 @@ moonImg = pygame.image.load('icons/moon.png')
 
 running = True
 
+score = 0
+font = pygame.font.Font('freesansbold.ttf', 32)
+score_x = 370
+score_y = 10
+
+
+def show_score(x, y):
+    score_board = font.render("Score : " + str(score), True, (255, 255, 255))
+    screen.blit(score_board, (x, y))
+
+
 player_x = 370
 player_y = 480
 player_x_change = 0
 player_y_change = 0
 
-enemyImg = pygame.image.load('icons/basic_enemy.png')
-enemy_x = random.randint(50, 750)
-enemy_y = random.randint(50, 150)
-enemy_x_change = 0.05
-enemy_y_change = 10
+enemyImg = []
+enemy_x = []
+enemy_y = []
+enemy_x_change = []
+enemy_y_change = []
+num_of_enemies = 50
+
+for i in range(num_of_enemies):
+    enemyImg.append(pygame.image.load('icons/basic_enemy.png'))
+    enemy_x.append(random.randint(50, 750))
+    enemy_y.append(random.randint(50, 150))
+    enemy_x_change.append(0.1)
+    enemy_y_change.append(10)
 
 missileImg = pygame.image.load('icons/missile.png')
 missile_x = player_x
@@ -44,8 +64,22 @@ def set_player(x, y):
     screen.blit(playerImg, (x, y))
 
 
-def set_enemy(x, y):
-    screen.blit(enemyImg, (x, y))
+def set_enemy(x, y, enemy_index):
+    screen.blit(enemyImg[enemy_index], (x, y))
+
+
+def is_collision(first_object_x, first_object__y, second_object_x, second_object_y):
+    distance = math.sqrt(math.pow(first_object_x - second_object_x, 2) + math.pow(first_object__y - second_object_y, 2))
+    if distance < 27:
+        return True
+    else:
+        return False
+
+
+def reset_enemy(enemy_index):
+    global enemy_x, enemy_y
+    enemy_x[enemy_index] = random.randint(50, 750)
+    enemy_y[enemy_index] = random.randint(50, 150)
 
 
 while running:
@@ -87,11 +121,20 @@ while running:
     if player_y >= 560:
         player_y = 560
 
-    enemy_x += enemy_x_change
+    for enemy in range(num_of_enemies):
+        enemy_x[enemy] += enemy_x_change[enemy]
+        if enemy_x[enemy] <= 0 or enemy_x[enemy] >= 768:
+            enemy_y[enemy] += enemy_y_change[enemy]
+            enemy_x_change[enemy] *= -1
 
-    if enemy_x <= 0 or enemy_x >= 768:
-        enemy_y += enemy_y_change
-        enemy_x_change *= -1
+        isStrike = is_collision(enemy_x[enemy], enemy_y[enemy], missile_x, missile_y)
+        if isStrike:
+            missile_y = player_y
+            isFired = False
+            score += 10
+            reset_enemy(enemy)
+
+        set_enemy(enemy_x[enemy], enemy_y[enemy], enemy)
 
     if missile_y <= 0:
         missile_y = player_y
@@ -104,5 +147,5 @@ while running:
     screen.blit(moonImg, (50, 500))
     screen.blit(marsImg, (600, 50))
     set_player(player_x, player_y)
-    set_enemy(enemy_x, enemy_y)
+    show_score(score_x, score_y)
     pygame.display.update()
