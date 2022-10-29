@@ -14,7 +14,8 @@ marsImg = pygame.image.load('icons/mars.png')
 moonImg = pygame.image.load('icons/moon.png')
 
 
-running = True
+isGameOver = False
+isRunning = True
 
 score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
@@ -22,9 +23,20 @@ score_x = 370
 score_y = 10
 
 
+game_over_font = pygame.font.Font('freesansbold.ttf', 64)
+game_over_x = 370
+game_over_y = 300
+
+
 def show_score(x, y):
     score_board = font.render("Score : " + str(score), True, (255, 255, 255))
     screen.blit(score_board, (x, y))
+
+
+def game_over():
+    over_text = game_over_font.render("GAME OVER", True, (255, 255, 255))
+    show_score(300, 400)
+    screen.blit(over_text, (200, 300))
 
 
 player_x = 370
@@ -70,10 +82,7 @@ def set_enemy(x, y, enemy_index):
 
 def is_collision(first_object_x, first_object__y, second_object_x, second_object_y):
     distance = math.sqrt(math.pow(first_object_x - second_object_x, 2) + math.pow(first_object__y - second_object_y, 2))
-    if distance < 27:
-        return True
-    else:
-        return False
+    return distance < 27
 
 
 def reset_enemy(enemy_index):
@@ -82,12 +91,12 @@ def reset_enemy(enemy_index):
     enemy_y[enemy_index] = random.randint(50, 150)
 
 
-while running:
+while isRunning:
     screen.fill((0, 0, 20))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            isRunning = False
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -122,13 +131,18 @@ while running:
         player_y = 560
 
     for enemy in range(num_of_enemies):
+        if is_collision(player_x, player_y, enemy_x[enemy], enemy_y[enemy]):
+            for i in range(num_of_enemies):
+                enemy_y[i] = 2000
+            isGameOver = True
+            break
+
         enemy_x[enemy] += enemy_x_change[enemy]
         if enemy_x[enemy] <= 0 or enemy_x[enemy] >= 768:
             enemy_y[enemy] += enemy_y_change[enemy]
             enemy_x_change[enemy] *= -1
 
-        isStrike = is_collision(enemy_x[enemy], enemy_y[enemy], missile_x, missile_y)
-        if isStrike:
+        if is_collision(enemy_x[enemy], enemy_y[enemy], missile_x, missile_y):
             missile_y = player_y
             isFired = False
             score += 10
@@ -142,6 +156,9 @@ while running:
     if isFired:
         fire_missile(missile_x, missile_y)
         missile_y -= missile_y_change
+
+    if isGameOver:
+        game_over()
 
     screen.blit(earthImg, (0, 0))
     screen.blit(moonImg, (50, 500))
