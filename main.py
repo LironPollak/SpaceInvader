@@ -13,7 +13,6 @@ earthImg = pygame.image.load('icons/earth.png')
 marsImg = pygame.image.load('icons/mars.png')
 moonImg = pygame.image.load('icons/moon.png')
 
-
 isGameOver = False
 isRunning = True
 
@@ -21,7 +20,6 @@ score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 score_x = 370
 score_y = 10
-
 
 game_over_font = pygame.font.Font('freesansbold.ttf', 64)
 game_over_x = 370
@@ -55,7 +53,7 @@ for i in range(num_of_enemies):
     enemyImg.append(pygame.image.load('icons/basic_enemy.png'))
     enemy_x.append(random.randint(50, 750))
     enemy_y.append(random.randint(50, 150))
-    enemy_x_change.append(0.1)
+    enemy_x_change.append(0.5)
     enemy_y_change.append(10)
 
 missileImg = pygame.image.load('icons/missile.png')
@@ -93,6 +91,9 @@ def reset_enemy(enemy_index):
 
 while isRunning:
     screen.fill((0, 0, 20))
+    screen.blit(moonImg, (0, 0))
+    screen.blit(earthImg, (50, 500))
+    screen.blit(marsImg, (600, 50))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -160,9 +161,6 @@ while isRunning:
     if isGameOver:
         game_over()
 
-    screen.blit(earthImg, (0, 0))
-    screen.blit(moonImg, (50, 500))
-    screen.blit(marsImg, (600, 50))
     set_player(player_x, player_y)
     show_score(score_x, score_y)
     pygame.display.update()
